@@ -180,6 +180,37 @@ function Progresso() {
 //   passaro.animar();
 // }, 20);
 
+function estaoSobrepostos(elementoA, elementoB) {
+  const a = elementoA.getBoundingClientRect();
+  const b = elementoB.getBoundingClientRect();
+
+  // a distancia de a do limite da esquerda + sua largura = lado direito do elemento A
+  // onde, se esse cumprimento for maior ou igual ao lado esquerdo de B, retorna true
+  // E
+  // a distancia de B do lado esquerdo + sua largura = lado direito de B
+  // onde, se esse cumprimento for maior ou igual ao lado esquerdo de A, retorna true
+  const horizontal = a.left + a.width >= b.left && b.left + b.width >= a.left;
+
+  const vertical = a.top + a.height >= b.top && b.top + b.height >= a.top;
+
+  return horizontal && vertical;
+}
+
+function colidiu(passaro, barreiras) {
+  let colidiu = false;
+
+  barreiras.pares.forEach((parDeBarreiras) => {
+    if (!colidiu) {
+      const superior = parDeBarreiras.superior.elemento;
+      const inferior = parDeBarreiras.inferior.elemento;
+      colidiu =
+        estaoSobrepostos(passaro.elemento, superior) ||
+        estaoSobrepostos(passaro.elemento, inferior);
+    }
+  });
+
+  return colidiu;
+}
 function FlappyBird() {
   let pontos = 0;
 
@@ -202,6 +233,10 @@ function FlappyBird() {
     const temporizador = setInterval(() => {
       barreiras.animar();
       passaro.animar();
+
+      if (colidiu(passaro, barreiras)) {
+        clearInterval(temporizador);
+      }
     }, 20);
   };
 }
